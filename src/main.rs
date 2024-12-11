@@ -17,7 +17,7 @@ enum Direction {
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2d);
     commands.spawn((
-        Sprite::from_image(asset_server.load("mascot.jpg")),
+        Sprite::from_image(asset_server.load("mascot.png")),
         Transform::from_xyz(100., 0., 0.),
         Direction::Up,
     ));
