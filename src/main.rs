@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-mod dialogueScene;
+mod dating_sim;
 mod game;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]

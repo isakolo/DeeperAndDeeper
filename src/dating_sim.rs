@@ -36,14 +36,7 @@ struct DialogueOption {
     mission: Option<MissionType>,
 }
 
-use bevy::{
-    color::palettes::css::*,
-    math::ops,
-    prelude::*,
-    sprite::Anchor,
-    text::{FontSmoothing, LineBreak, TextBounds},
-    window::PrimaryWindow,
-};
+use bevy::{math::ops, prelude::*, window::PrimaryWindow};
 
 // fn main() {
 //     App::new()
@@ -113,7 +106,7 @@ pub fn dating_sim_plugin(app: &mut App) {
 
 fn on_datingSim(
     mut commands: Commands,
-    mut context: ResMut<DatingContext>,
+    context: ResMut<DatingContext>,
     asset_server: Res<AssetServer>,
 ) {
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
@@ -133,7 +126,7 @@ fn on_datingSim(
         if let Some(mission_var) = i.current_dialogue.mission {
             let box_size = Vec2::new(100.0, 100.0);
             let box_position = box_position + Vec2::new(0.0, -150.0);
-            let mut enc = commands.spawn((
+            let enc = commands.spawn((
                 Sprite::from_color(Color::srgb(0.75, 0.25, 0.25), box_size),
                 Transform::from_translation(box_position.extend(0.0)),
             ));

@@ -1,8 +1,4 @@
-use bevy::{
-    prelude::*,
-    text::{FontSmoothing, LineBreak, TextBounds},
-    window::WindowResolution,
-};
+use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
 use super::{despawn_screen, GameState};
@@ -30,7 +26,7 @@ struct ExplorationMap {
     tiles: [(); 0],
 }
 
-pub fn start_exploration(mut commands: Commands) {}
+pub fn start_exploration(commands: Commands) {}
 
 pub fn spawn_player(
     mut commands: Commands,
