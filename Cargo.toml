@@ -8,12 +8,3 @@ edition = "2021"
 [dependencies]
 bevy = "0.15.0"
 bevy_rapier2d = "0.28.0"
-
-
-[[bin]]
-name = "dialogue"
-path = "src/dialogueScene.rs"
-
-[[bin]]
-name = "platformer"
-path = "src/main.rs"
