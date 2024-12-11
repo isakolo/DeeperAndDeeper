@@ -73,7 +73,7 @@ struct AnimateRotation;
 #[derive(Component)]
 struct AnimateScale;
 
-fn dating_sim_plugin(app: &mut App) {
+pub fn dating_sim_plugin(app: &mut App) {
     let janitor_joe = CharactersStatus {
         character: CharactersType::JanitorJoe,
         current_dialogue: DialogueOption {
