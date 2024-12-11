@@ -16,7 +16,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .init_state::<GameState>()
         .add_systems(Startup, setup)
-        .add_plugins((game::game_plugin, dialogueScene::dating_sim_plugin));
+        .add_plugins((game::game_plugin, dating_sim::dating_sim_plugin));
 }
 
 fn setup(mut commands: Commands) {
