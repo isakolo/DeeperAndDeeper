@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    text::{FontSmoothing, LineBreak, TextBounds},
+};
 
 fn main() {
     App::new()
