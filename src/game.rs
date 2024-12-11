@@ -14,6 +14,7 @@ pub fn game_plugin(app: &mut App) {
             (spawn_player, start_exploration),
         )
         .add_systems(Update, player_movement.run_if(in_state(GameState::Explore)))
+        .add_systems(OnExit(GameState::Explore), despawn_screen::<OnExploration>)
         .run();
 }
 
