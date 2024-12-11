@@ -26,6 +26,11 @@ struct CharactersStatus {
     alive: bool,
 }
 
+#[derive(Resource)]
+struct DatingContext {
+    all_characters: Vec<CharactersStatus>,
+}
+
 struct DialogueOption {
     scene_Flag: usize,
     mission: Option<MissionType>,
@@ -40,21 +45,21 @@ use bevy::{
     window::PrimaryWindow,
 };
 
-fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_systems(Startup, setup)
-        .add_systems(
-            Update,
-            (
-                animate_translation,
-                animate_rotation,
-                animate_scale,
-                follow_mouse,
-            ),
-        )
-        .run();
-}
+// fn main() {
+//     App::new()
+//         .add_plugins(DefaultPlugins)
+//         .add_systems(Startup, setup)
+//         .add_systems(
+//             Update,
+//             (
+//                 animate_translation,
+//                 animate_rotation,
+//                 animate_scale,
+//                 follow_mouse,
+//             ),
+//         )
+//         .run();
+//}
 
 #[derive(Component)]
 struct FollowsMouse;
@@ -68,14 +73,7 @@ struct AnimateRotation;
 #[derive(Component)]
 struct AnimateScale;
 
-fn onDatingSim(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let font = asset_server.load("fonts/FiraSans-Bold.ttf");
-    let text_font = TextFont {
-        font: font.clone(),
-        font_size: 50.0,
-        ..default()
-    };
-
+fn dating_sim_plugin(app: &mut App) {
     let janitor_joe = CharactersStatus {
         character: CharactersType::JanitorJoe,
         current_dialogue: DialogueOption {
@@ -108,12 +106,29 @@ fn onDatingSim(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     let characters = vec![janitor_joe, granny, cat];
 
+    app.insert_resource(DatingContext {
+        all_characters: characters,
+    });
+}
+
+fn on_datingSim(
+    mut commands: Commands,
+    mut context: ResMut<DatingContext>,
+    asset_server: Res<AssetServer>,
+) {
+    let font = asset_server.load("fonts/FiraSans-Bold.ttf");
+    let text_font = TextFont {
+        font: font.clone(),
+        font_size: 50.0,
+        ..default()
+    };
+
     let slightly_smaller_text_font = TextFont {
         font,
         font_size: 35.0,
         ..default()
     };
-    for (idx, i) in characters.iter().enumerate() {
+    for (idx, i) in context.all_characters.iter().enumerate() {
         let box_position = dbg!(Vec2::new((idx as f32 * 200.0) - 500.0, 250.0));
         if let Some(mission_var) = i.current_dialogue.mission {
             let box_size = Vec2::new(100.0, 100.0);
@@ -150,6 +165,8 @@ fn onDatingSim(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2d);
     // Demonstrate changing translation
 }
+
+fn offDatingSim() {}
 
 fn animate_translation(
     time: Res<Time>,
