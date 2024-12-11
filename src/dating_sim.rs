@@ -38,6 +38,8 @@ struct DialogueOption {
 
 use bevy::{math::ops, prelude::*, window::PrimaryWindow};
 
+use crate::GameState;
+
 // fn main() {
 //     App::new()
 //         .add_plugins(DefaultPlugins)
@@ -102,6 +104,8 @@ pub fn dating_sim_plugin(app: &mut App) {
     app.insert_resource(DatingContext {
         all_characters: characters,
     });
+
+    app.add_systems(OnEnter(GameState::DatingSim), on_dating_sim);
 }
 
 fn on_dating_sim(
