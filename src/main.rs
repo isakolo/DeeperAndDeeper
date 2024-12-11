@@ -1,3 +1,5 @@
+#![allow(dead_code, unused_variables)]
+
 use bevy::prelude::*;
 
 mod dating_sim;

@@ -32,7 +32,7 @@ struct DatingContext {
 }
 
 struct DialogueOption {
-    scene_Flag: usize,
+    scene_flag: usize,
     mission: Option<MissionType>,
 }
 
@@ -70,7 +70,7 @@ pub fn dating_sim_plugin(app: &mut App) {
     let janitor_joe = CharactersStatus {
         character: CharactersType::JanitorJoe,
         current_dialogue: DialogueOption {
-            scene_Flag: 2,
+            scene_flag: 2,
             mission: Some(MissionType::Water),
         },
         favor: 20,
@@ -80,7 +80,7 @@ pub fn dating_sim_plugin(app: &mut App) {
     let cat = CharactersStatus {
         character: CharactersType::Cat,
         current_dialogue: DialogueOption {
-            scene_Flag: 2,
+            scene_flag: 2,
             mission: None,
         },
         favor: 20,
@@ -90,7 +90,7 @@ pub fn dating_sim_plugin(app: &mut App) {
     let granny = CharactersStatus {
         character: CharactersType::Oldlady,
         current_dialogue: DialogueOption {
-            scene_Flag: 3,
+            scene_flag: 3,
             mission: Some(MissionType::Oil),
         },
         favor: 20,
@@ -104,7 +104,7 @@ pub fn dating_sim_plugin(app: &mut App) {
     });
 }
 
-fn on_datingSim(
+fn on_dating_sim(
     mut commands: Commands,
     context: ResMut<DatingContext>,
     asset_server: Res<AssetServer>,
@@ -159,7 +159,7 @@ fn on_datingSim(
     // Demonstrate changing translation
 }
 
-fn offDatingSim() {}
+fn off_dating_sim() {}
 
 fn animate_translation(
     time: Res<Time>,
