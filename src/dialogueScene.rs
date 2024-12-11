@@ -3,15 +3,30 @@
 //    picking: Vec<option>,
 //}
 
+#[derive(Copy, Clone, Debug)]
 enum MissionType {
-    water,
-    explore,
-    oil,
-    iron,
+    Water,
+    Explore,
+    Oil,
+    Iron,
+}
+
+enum CharactersType {
+    JanitorJoe,
+    Oldlady,
+    Twin1,
+    Twin2,
+    Cat,
+}
+
+struct CharactersStatus {
+    character: CharactersType,
+    current_dialogue: DialogueOption,
+    favor: usize,
+    alive: bool,
 }
 
 struct DialogueOption {
-    text: String,
     scene_Flag: usize,
     mission: Option<MissionType>,
 }
@@ -22,6 +37,7 @@ use bevy::{
     prelude::*,
     sprite::Anchor,
     text::{FontSmoothing, LineBreak, TextBounds},
+    window::PrimaryWindow,
 };
 
 fn main() {
@@ -30,10 +46,18 @@ fn main() {
         .add_systems(Startup, setup)
         .add_systems(
             Update,
-            (animate_translation, animate_rotation, animate_scale),
+            (
+                animate_translation,
+                animate_rotation,
+                animate_scale,
+                follow_mouse,
+            ),
         )
         .run();
 }
+
+#[derive(Component)]
+struct FollowsMouse;
 
 #[derive(Component)]
 struct AnimateTranslation;
@@ -44,7 +68,7 @@ struct AnimateRotation;
 #[derive(Component)]
 struct AnimateScale;
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn onDatingSim(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
     let text_font = TextFont {
         font: font.clone(),
@@ -52,59 +76,73 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         ..default()
     };
 
-    let dialouge_GETIRON = DialogueOption {
-        text: String::from("I need iron"),
-        scene_Flag: 1,
-        mission: Some(MissionType::iron),
-    };
-    let dialouge_GETWATER = DialogueOption {
-        text: String::from("I'm thirsty"),
-        scene_Flag: 2,
-        mission: Some(MissionType::water),
-    };
-    let dialouge_GETOIL = DialogueOption {
-        text: String::from("GIVE ME OIL"),
-        scene_Flag: 3,
-        mission: Some(MissionType::oil),
+    let janitor_joe = CharactersStatus {
+        character: CharactersType::JanitorJoe,
+        current_dialogue: DialogueOption {
+            scene_Flag: 2,
+            mission: Some(MissionType::Water),
+        },
+        favor: 20,
+        alive: true,
     };
 
-    let dialouge_TalkShit = DialogueOption {
-        text: String::from("Talk shit with Joe"),
-        scene_Flag: 3,
-        mission: None,
+    let cat = CharactersStatus {
+        character: CharactersType::Cat,
+        current_dialogue: DialogueOption {
+            scene_Flag: 2,
+            mission: None,
+        },
+        favor: 20,
+        alive: true,
     };
 
-    let dialogue_options = vec![
-        dialouge_GETIRON,
-        dialouge_GETWATER,
-        dialouge_GETOIL,
-        dialouge_TalkShit,
-    ];
+    let granny = CharactersStatus {
+        character: CharactersType::Oldlady,
+        current_dialogue: DialogueOption {
+            scene_Flag: 3,
+            mission: Some(MissionType::Oil),
+        },
+        favor: 20,
+        alive: true,
+    };
+
+    let characters = vec![janitor_joe, granny, cat];
 
     let slightly_smaller_text_font = TextFont {
         font,
         font_size: 35.0,
         ..default()
     };
-    for (idx, i) in dialogue_options.iter().enumerate() {
-        let box_size = Vec2::new(800.0, 100.0);
-        let box_position = dbg!(Vec2::new(-100.0, (idx as f32 * -125.0) + 250.0));
-        commands
-            .spawn((
-                Sprite::from_color(Color::srgb(0.25, 0.25, 0.75), box_size),
+    for (idx, i) in characters.iter().enumerate() {
+        let box_position = dbg!(Vec2::new((idx as f32 * 200.0) - 500.0, 250.0));
+        if let Some(mission_var) = i.current_dialogue.mission {
+            let box_size = Vec2::new(100.0, 100.0);
+            let box_position = box_position + Vec2::new(0.0, -150.0);
+            let mut enc = commands.spawn((
+                Sprite::from_color(Color::srgb(0.75, 0.25, 0.25), box_size),
                 Transform::from_translation(box_position.extend(0.0)),
-            ))
-            .with_children(|builder| {
-                builder.spawn((
-                    Text2d::new(i.text.clone()),
-                    slightly_smaller_text_font.clone(),
-                    TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
-                    // Wrap text in the rectangle
-                    TextBounds::from(box_size),
-                    // ensure the text is drawn on top of the box
-                    Transform::from_translation(Vec3::Z),
-                ));
-            });
+            ));
+            //if (idx == 0) {
+            //    enc.insert(FollowsMouse);
+            //}
+        }
+
+        let box_size = Vec2::new(150.0, 150.0);
+        commands.spawn((
+            Sprite::from_color(Color::srgb(0.25, 0.25, 0.75), box_size),
+            Transform::from_translation(box_position.extend(0.0)),
+        ));
+        //.with_children(|builder| {
+        //    builder.spawn((
+        //        Text2d::new(i.text.clone()),
+        //        slightly_smaller_text_font.clone(),
+        //        TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
+        //        // Wrap text in the rectangle
+        //        TextBounds::from(box_size),
+        //        // ensure the text is drawn on top of the box
+        //        Transform::from_translation(Vec3::Z),
+        //    ));
+        //});
     }
 
     let text_justification = JustifyText::Center;
@@ -120,6 +158,19 @@ fn animate_translation(
     for mut transform in &mut query {
         transform.translation.x = 100.0 * ops::sin(time.elapsed_secs()) - 400.0;
         transform.translation.y = 100.0 * ops::cos(time.elapsed_secs());
+    }
+}
+
+fn follow_mouse(
+    q_windows: Query<&Window, With<PrimaryWindow>>,
+    mut transform: Query<&mut Transform, With<FollowsMouse>>,
+) {
+    let Some(position) = q_windows.single().cursor_position() else {
+        return;
+    };
+
+    for mut transform in &mut transform {
+        transform.translation = position.extend(0.0);
     }
 }
 
