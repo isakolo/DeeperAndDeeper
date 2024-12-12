@@ -112,11 +112,16 @@ enum Tile {
     Iron,
     Air,
 }
-// fn load_map(texture: Handle<Image>) {
-//     let map_pixel texture::get_pixel();//server.load("mascot.png")
-//     let mut map = [[Some(Tile::Rock); 8]; 8];
-//     map[0][1] = None;
-//}
+
+impl Tile {
+    fn is_solid(&self) -> bool {
+        use Tile as T;
+        match self {
+            T::Error | T::Rock | T::Ice | T::Oil | T::Iron => true,
+            T::Air => false,
+        }
+    }
+}
 
 pub fn spawn_player(
     mut commands: Commands,
