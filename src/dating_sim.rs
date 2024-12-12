@@ -12,8 +12,9 @@ enum MissionType {
 }
 
 enum CharactersType {
-    JanitorJoe,
+    Joe,
     Oldlady,
+    Weed,
     Twin1,
     Twin2,
     Cat,
@@ -40,22 +41,6 @@ use bevy::{math::ops, prelude::*, window::PrimaryWindow};
 
 use crate::GameState;
 
-// fn main() {
-//     App::new()
-//         .add_plugins(DefaultPlugins)
-//         .add_systems(Startup, setup)
-//         .add_systems(
-//             Update,
-//             (
-//                 animate_translation,
-//                 animate_rotation,
-//                 animate_scale,
-//                 follow_mouse,
-//             ),
-//         )
-//         .run();
-//}
-
 #[derive(Component)]
 struct FollowsMouse;
 
@@ -70,7 +55,7 @@ struct AnimateScale;
 
 pub fn dating_sim_plugin(app: &mut App) {
     let janitor_joe = CharactersStatus {
-        character: CharactersType::JanitorJoe,
+        character: CharactersType::Joe,
         current_dialogue: DialogueOption {
             scene_flag: 2,
             mission: Some(MissionType::Water),
@@ -99,7 +84,27 @@ pub fn dating_sim_plugin(app: &mut App) {
         alive: true,
     };
 
-    let characters = vec![janitor_joe, granny, cat];
+    let twin1 = CharactersStatus {
+        character: CharactersType::Twin1,
+        current_dialogue: DialogueOption {
+            scene_flag: 4,
+            mission: None,
+        },
+        favor: 20,
+        alive: true,
+    };
+
+    let twin2 = CharactersStatus {
+        character: CharactersType::Twin2,
+        current_dialogue: DialogueOption {
+            scene_flag: 4,
+            mission: None,
+        },
+        favor: 20,
+        alive: true,
+    };
+
+    let characters = vec![janitor_joe, granny, cat, twin1, twin2];
 
     app.insert_resource(DatingContext {
         all_characters: characters,
@@ -112,7 +117,12 @@ fn on_dating_sim(
     mut commands: Commands,
     context: ResMut<DatingContext>,
     asset_server: Res<AssetServer>,
+    windows: Query<&mut Window, With<PrimaryWindow>>,
 ) {
+    let window = windows.single();
+    let width = window.resolution.width();
+    let height = window.resolution.height();
+
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
     let text_font = TextFont {
         font: font.clone(),
@@ -126,35 +136,48 @@ fn on_dating_sim(
         ..default()
     };
     for (idx, i) in context.all_characters.iter().enumerate() {
+        let size = width / 7.0;
+        let portrait = match i.character {
+            CharactersType::Joe => Sprite {
+                custom_size: Some(Vec2::new(size, size)),
+                image: asset_server.load("Portraits/Janitor Joe-Recovered.png"),
+                image_mode: SpriteImageMode::Auto,
+                ..Default::default()
+            },
+            CharactersType::Oldlady => Sprite {
+                custom_size: Some(Vec2::new(size, size)),
+                image: asset_server.load("Portraits/Character_General_Jule.png"),
+                image_mode: SpriteImageMode::Auto,
+                ..Default::default()
+            },
+            CharactersType::Twin1 => Sprite {
+                custom_size: Some(Vec2::new(size, size)),
+                image: asset_server.load("Portraits/Character_Twin_Fredrick.png"),
+                image_mode: SpriteImageMode::Auto,
+                ..Default::default()
+            },
+            _ => Sprite::from_color(Color::srgb(0.25, 0.25, 0.75), Vec2::new(size, size)),
+        };
+
         let box_position = dbg!(Vec2::new((idx as f32 * 200.0) - 500.0, 250.0));
         if let Some(mission_var) = i.current_dialogue.mission {
-            let box_size = Vec2::new(100.0, 100.0);
+            let box_size = Vec2::new(size / 1.5, size / 1.5);
             let box_position = box_position + Vec2::new(0.0, -150.0);
             let enc = commands.spawn((
                 Sprite::from_color(Color::srgb(0.75, 0.25, 0.25), box_size),
                 Transform::from_translation(box_position.extend(0.0)),
             ));
-            //if (idx == 0) {
-            //    enc.insert(FollowsMouse);
-            //}
-        }
+        };
 
-        let box_size = Vec2::new(150.0, 150.0);
-        commands.spawn((
-            Sprite::from_color(Color::srgb(0.25, 0.25, 0.75), box_size),
-            Transform::from_translation(box_position.extend(0.0)),
-        ));
-        //.with_children(|builder| {
-        //    builder.spawn((
-        //        Text2d::new(i.text.clone()),
-        //        slightly_smaller_text_font.clone(),
-        //        TextLayout::new(JustifyText::Left, LineBreak::WordBoundary),
-        //        // Wrap text in the rectangle
-        //        TextBounds::from(box_size),
-        //        // ensure the text is drawn on top of the box
-        //        Transform::from_translation(Vec3::Z),
-        //    ));
-        //});
+        let box_size = Vec2::new(size, size);
+        commands
+            .spawn((
+                Sprite::from_color(Color::srgb(0.75, 0.75, 0.75), box_size),
+                Transform::from_translation(box_position.extend(0.0)),
+            ))
+            .with_children(|builder| {
+                builder.spawn((portrait, Transform::from_translation(Vec3::Z)));
+            });
     }
 
     let text_justification = JustifyText::Center;
