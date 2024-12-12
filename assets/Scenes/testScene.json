@@ -2,24 +2,24 @@
   { 
     "id": "Should we eat",
     "person": "Joe",
-    "text": ["I am hungry", "That cat is looking really yummy"],
+    "text": [[null,"I am hungry"], ["Carle","That cat is looking really yummy"]],
     "choice": [["We should eat the cat", "EAT"],["We should not eat the cat","No eat"]]
 
    },
   { 
     "id": "EAT",
         "person": "Twin1",
-    "text": ["That cat was soooooo yummy", "burp"],
+    "text": [[null,"That cat was soooooo yummy"], [null,"burp"]],
     "outcome": [["Foodsupply",3],["CatDead",1],["Twin1Favor",-5]]
    },
   { 
     "id": "No eat",
-    "text": ["Cringe","Go out onto the planet and find some food then idiot"],
+    "text": [[null,"Cringe"],[null,"Go out onto the planet and find some food then idiot"]],
     "mission": "Oil"
    },
   { 
     "id": "9",
-    "text": ["Hello I am JSON text"]
+    "text": [[null,"Hello I am JSON text"]]
    }
 
 ]

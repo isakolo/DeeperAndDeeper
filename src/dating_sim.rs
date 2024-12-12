@@ -67,8 +67,7 @@ enum DatingState {
 #[derive(Deserialize, Debug)]
 pub struct DatingScene {
     id: String,
-    person: Option<CharactersType>,
-    text: Vec<String>,
+    text: Vec<(Option<CharactersType>, String)>,
     outcome: Option<Vec<(String, isize)>>,
     choice: Option<((String, String), (String, String))>,
     mission: Option<MissionType>,
@@ -141,7 +140,7 @@ pub fn dating_sim_plugin(app: &mut App) {
     };
 
     let twin1 = CharactersStatus {
-        character: CharactersType::Frederick,
+        character: CharactersType::Fredrick,
         current_dialogue: DialogueOption {
             scene_flag: 4,
             mission: None,
@@ -161,7 +160,7 @@ pub fn dating_sim_plugin(app: &mut App) {
     };
 
     let carly = CharactersStatus {
-        character: CharactersType::Carly,
+        character: CharactersType::Carle,
         current_dialogue: DialogueOption {
             scene_flag: 4,
             mission: None,
@@ -189,10 +188,9 @@ pub fn dating_sim_plugin(app: &mut App) {
         selected_scene: DatingScene {
             id: "1".to_string(),
             text: vec![
-                "This is a placeholder".to_string(),
-                "This is a second placeholder".to_string(),
+                (None, "This is a placeholder".to_string()),
+                (None, "This is a second placeholder".to_string()),
             ],
-            person: None,
             outcome: None,
             choice: None,
             mission: None,
@@ -300,7 +298,7 @@ fn on_chill(
                 image: asset_server.load("Portraits/Character_General_Jule.png"),
                 ..Default::default()
             },
-            CharactersType::Frederick => Sprite {
+            CharactersType::Fredrick => Sprite {
                 custom_size: Some(Vec2::new(size, size)),
                 image: asset_server.load("Portraits/Character_Twin_Dedrick.png"),
                 ..Default::default()
@@ -312,7 +310,7 @@ fn on_chill(
                 ..Default::default()
             },
 
-            CharactersType::Carly => Sprite {
+            CharactersType::Carle => Sprite {
                 custom_size: Some(Vec2::new(size, size)),
                 image: asset_server.load("Portraits/Character_Carly.png"),
                 ..Default::default()
@@ -385,7 +383,7 @@ fn start_talking(
     let talk_size = Vec2::new(width / 1.6, width / 10.0);
     let talk_position = Vec2::new(0.0, -150.0);
 
-    let dialogue = context.selected_scene.text[0].clone();
+    let dialogue = context.selected_scene.text[0].1.clone();
     commands
         .spawn((
             Sprite::from_color(Color::srgb(0.20, 0.3, 0.70), talk_size),
@@ -424,7 +422,7 @@ fn talking_action(
         for (mut textbox, mut text) in &mut query {
             (*textbox).0 += 1;
             if (*textbox).0 < context.selected_scene.text.len() {
-                let dialogue = dbg!(context.selected_scene.text[(*textbox).0 as usize].clone());
+                let dialogue = dbg!(context.selected_scene.text[(*textbox).0 as usize].1.clone());
                 *text = Text2d::new(dialogue);
             } else {
                 //We have finished reading
