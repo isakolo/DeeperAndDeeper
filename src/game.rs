@@ -27,6 +27,19 @@ struct ExplorationMap {
 
 pub fn start_exploration(commands: Commands) {}
 
+#[derive(Copy, Clone)]
+enum Tile {
+    Rock,
+    Ice,
+    Oil,
+    Iron,
+}
+// fn load_map(texture: Handle<Image>) {
+//     let map_pixel texture::get_pixel();//server.load("mascot.png")
+//     let mut map = [[Some(Tile::Rock); 8]; 8];
+//     map[0][1] = None;
+//}
+
 pub fn spawn_player(
     mut commands: Commands,
     server: Res<AssetServer>,

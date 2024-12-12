@@ -3,9 +3,17 @@
 //    picking: Vec<option>,
 //}
 
+use super::{despawn_screen, GameState};
 use crate::load;
+use bevy::{
+    math::ops,
+    prelude::*,
+    text::{FontSmoothing, LineBreak, TextBounds},
+    window::PrimaryWindow,
+};
+use serde::Deserialize;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Deserialize, Copy, Clone, Debug)]
 enum MissionType {
     Water,
     Explore,
@@ -36,7 +44,7 @@ struct DatingContext {
     all_characters: Vec<CharactersStatus>,
     day: usize,
     cursor: isize,
-    state: State,
+    selected_scene: DatingScene,
 }
 
 struct DialogueOption {
@@ -44,15 +52,21 @@ struct DialogueOption {
     mission: Option<MissionType>,
 }
 
-enum State {
+#[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
+enum DatingState {
+    #[default]
     Chilling,
     Talking,
     Choosing,
 }
 
-use bevy::{math::ops, prelude::*, window::PrimaryWindow};
-
-use crate::GameState;
+#[derive(Deserialize, Debug)]
+pub struct DatingScene {
+    id: usize,
+    text: Vec<String>,
+    choice: Option<((String, usize), (String, usize))>,
+    mission: Option<MissionType>,
+}
 
 #[derive(Component)]
 struct FollowsMouse;
@@ -65,6 +79,24 @@ struct AnimateRotation;
 
 #[derive(Component)]
 struct AnimateScale;
+
+#[derive(Component)]
+struct Cursor(isize);
+
+#[derive(Component)]
+struct Portrait;
+
+#[derive(Component)]
+struct MissionNot;
+
+#[derive(Component)]
+struct DatingObj;
+
+#[derive(Component)]
+struct TalkObj;
+
+#[derive(Component)]
+struct TextBox(u8);
 
 pub fn dating_sim_plugin(app: &mut App) {
     let _ = load::load_scenes();
@@ -82,7 +114,7 @@ pub fn dating_sim_plugin(app: &mut App) {
     let cat = CharactersStatus {
         character: CharactersType::Cat,
         current_dialogue: DialogueOption {
-            scene_flag: 2,
+            scene_flag: 8,
             mission: None,
         },
         favor: 20,
@@ -145,10 +177,34 @@ pub fn dating_sim_plugin(app: &mut App) {
         all_characters: characters,
         day: 1,
         cursor: 2,
-        state: State::Talking,
+        selected_scene: DatingScene {
+            id: 1,
+            text: vec![
+                "This is a placeholder".to_string(),
+                "This is a second placeholder".to_string(),
+            ],
+            choice: None,
+            mission: None,
+        },
     });
 
-    app.add_systems(OnEnter(GameState::DatingSim), on_dating_sim);
+    app.add_systems(OnEnter(GameState::DatingSim), on_dating_sim)
+        .add_systems(Update, cursor_action.run_if(in_state(GameState::DatingSim)))
+        .add_systems(OnExit(GameState::DatingSim), despawn_screen::<DatingObj>);
+
+    app.init_state::<DatingState>();
+
+    app.add_systems(OnEnter(DatingState::Talking), start_talking)
+        .add_systems(
+            Update,
+            talking_action.run_if(in_state(DatingState::Talking)),
+        )
+        .add_systems(OnExit(DatingState::Talking), despawn_screen::<TalkObj>);
+
+    app.add_systems(
+        OnExit(DatingState::Chilling),
+        (despawn_screen::<Portrait>, despawn_screen::<MissionNot>),
+    );
 }
 
 fn on_dating_sim(
@@ -173,51 +229,69 @@ fn on_dating_sim(
         font_size: 35.0,
         ..default()
     };
+
+    //Cursor initialisation
+
+    let background_size = Some(Vec2::new(width, height));
+    let background_position = Vec2::new(0.0, 0.0);
+    let enc = commands.spawn((
+        Sprite {
+            image: asset_server.load("Backgrounds/deeper_deeper_base.png"),
+            custom_size: background_size,
+            ..Default::default()
+        },
+        Transform::from_translation(background_position.extend(-1.0)),
+        DatingObj,
+    ));
+
+    let cursor_size = Vec2::new(width / 10.0, width / 10.0);
+    let cursor_position = Vec2::new(0.0, 0.0);
+    let enc = commands.spawn((
+        Sprite::from_color(Color::srgb(0.25, 0.75, 0.25), cursor_size),
+        Transform::from_translation(cursor_position.extend(0.0)),
+        Cursor(0),
+        Portrait,
+        DatingObj,
+    ));
+
     for (idx, i) in context.all_characters.iter().enumerate() {
         let size = width / 9.0;
         let portrait = match i.character {
             CharactersType::Joe => Sprite {
                 custom_size: Some(Vec2::new(size, size)),
                 image: asset_server.load("Portraits/Janitor Joe-Recovered.png"),
-                image_mode: SpriteImageMode::Auto,
                 ..Default::default()
             },
             CharactersType::Oldlady => Sprite {
                 custom_size: Some(Vec2::new(size, size)),
                 image: asset_server.load("Portraits/Character_General_Jule.png"),
-                image_mode: SpriteImageMode::Auto,
                 ..Default::default()
             },
             CharactersType::Twin1 => Sprite {
                 custom_size: Some(Vec2::new(size, size)),
                 image: asset_server.load("Portraits/Character_Twin_Dedrick.png"),
-                image_mode: SpriteImageMode::Auto,
                 ..Default::default()
             },
 
             CharactersType::Twin2 => Sprite {
                 custom_size: Some(Vec2::new(size, size)),
                 image: asset_server.load("Portraits/Character_Twin_Fredrick.png"),
-                image_mode: SpriteImageMode::Auto,
                 ..Default::default()
             },
 
             CharactersType::Carly => Sprite {
                 custom_size: Some(Vec2::new(size, size)),
                 image: asset_server.load("Portraits/Character_Carly.png"),
-                image_mode: SpriteImageMode::Auto,
                 ..Default::default()
             },
             CharactersType::Liv => Sprite {
                 custom_size: Some(Vec2::new(size, size)),
                 image: asset_server.load("Portraits/Character_Liv.png"),
-                image_mode: SpriteImageMode::Auto,
                 ..Default::default()
             },
             CharactersType::Cat => Sprite {
                 custom_size: Some(Vec2::new(size, size)),
                 image: asset_server.load("Portraits/Character_cat.png"),
-                image_mode: SpriteImageMode::Auto,
                 ..Default::default()
             },
             _ => Sprite::from_color(Color::srgb(0.25, 0.25, 0.75), Vec2::new(size, size)),
@@ -230,6 +304,8 @@ fn on_dating_sim(
             let enc = commands.spawn((
                 Sprite::from_color(Color::srgb(0.75, 0.25, 0.25), box_size),
                 Transform::from_translation(box_position.extend(0.0)),
+                DatingObj,
+                MissionNot,
             ));
         };
 
@@ -238,6 +314,8 @@ fn on_dating_sim(
             .spawn((
                 Sprite::from_color(Color::srgb(0.75, 0.75, 0.75), box_size),
                 Transform::from_translation(box_position.extend(0.0)),
+                Portrait,
+                DatingObj,
             ))
             .with_children(|builder| {
                 builder.spawn((portrait, Transform::from_translation(Vec3::Z)));
@@ -245,12 +323,76 @@ fn on_dating_sim(
     }
 
     let text_justification = JustifyText::Center;
-    // 2d camera
-    //commands.spawn(Camera2d);
-    // Demonstrate changing translation
 }
 
-fn off_dating_sim() {}
+fn start_talking(
+    mut commands: Commands,
+    context: ResMut<DatingContext>,
+    mut query: Query<&mut Transform, With<Cursor>>,
+    asset_server: Res<AssetServer>,
+    windows: Query<&mut Window, With<PrimaryWindow>>,
+) {
+    let window = windows.single();
+    let width = window.resolution.width();
+    let height = window.resolution.height();
+
+    let font = asset_server.load("fonts/FiraSans-Bold.ttf");
+    let text_font = TextFont {
+        font: font.clone(),
+        font_size: 50.0,
+        ..default()
+    };
+
+    let slightly_smaller_text_font = TextFont {
+        font,
+        font_size: 35.0,
+        ..default()
+    };
+
+    let talk_size = Vec2::new(width / 1.6, width / 10.0);
+    let talk_position = Vec2::new(0.0, -150.0);
+
+    let dialogue = context.selected_scene.text[0].clone();
+    commands
+        .spawn((
+            Sprite::from_color(Color::srgb(0.20, 0.3, 0.70), talk_size),
+            Transform::from_translation(talk_position.extend(0.0)),
+        ))
+        .with_children(|builder| {
+            builder.spawn((
+                Text2d::new(dialogue),
+                TextBox(0),
+                slightly_smaller_text_font.clone(),
+                TextLayout::new(JustifyText::Left, LineBreak::AnyCharacter),
+                // Wrap text in the rectangle
+                TextBounds::from(talk_size),
+                // ensure the text is drawn on top of the box
+                Transform::from_translation(Vec3::Z),
+            ));
+        });
+}
+
+fn talking_action(
+    time: Res<Time>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut query: Query<(&mut TextBox, &mut Text2d), With<TextBox>>,
+    mut context: ResMut<DatingContext>,
+    mut tmp: ResMut<NextState<DatingState>>,
+) {
+    let confirm = keyboard_input.just_pressed(KeyCode::Enter)
+        || keyboard_input.just_pressed(KeyCode::Space)
+        || keyboard_input.just_pressed(KeyCode::KeyZ);
+    let escape = keyboard_input.just_pressed(KeyCode::Escape);
+
+    if escape {
+        tmp.set(DatingState::Chilling);
+    } else if confirm {
+        for (mut textbox, mut text) in &mut query {
+            let dialogue = context.selected_scene.text[(*textbox).0 as usize].clone();
+            *text = Text2d::new(dialogue);
+        }
+    }
+}
 
 fn animate_translation(
     time: Res<Time>,
@@ -275,22 +417,6 @@ fn follow_mouse(
     }
 }
 
-pub fn player_movement(keyboard_input: Res<ButtonInput<KeyCode>>, context: ResMut<DatingContext>) {
-    if let mut cursor_pos = context.cursor {
-        //let up = keyboard_input.any_pressed([KeyCode::KeyW, KeyCode::ArrowUp]);
-        //let down = keyboard_input.any_pressed([KeyCode::KeyS, KeyCode::ArrowDown]);
-        let left = keyboard_input.any_pressed([KeyCode::KeyA, KeyCode::ArrowLeft]);
-        let right = keyboard_input.any_pressed([KeyCode::KeyD, KeyCode::ArrowRight]);
-        let confirm = keyboard_input.any_pressed([KeyCode::Enter, KeyCode::Space, KeyCode::KeyZ]);
-
-        cursor_pos = -(left as isize) + right as isize;
-
-        // Update the velocity on the rigid_body_component,
-        // the bevy_rapier plugin will update the Sprite transform.
-        //rb_vels.linvel = move_delta * player.0;
-    }
-}
-
 fn animate_rotation(
     time: Res<Time>,
     mut query: Query<&mut Transform, (With<Text2d>, With<AnimateRotation>)>,
@@ -300,15 +426,31 @@ fn animate_rotation(
     }
 }
 
-fn animate_scale(
+fn cursor_action(
     time: Res<Time>,
-    mut query: Query<&mut Transform, (With<Text2d>, With<AnimateScale>)>,
+    keyboard_input: Res<ButtonInput<KeyCode>>,
+    mut query: Query<&mut Transform, With<Cursor>>,
+    mut context: ResMut<DatingContext>,
+    mut tmp: ResMut<NextState<DatingState>>,
 ) {
     // Consider changing font-size instead of scaling the transform. Scaling a Text2D will scale the
     // rendered quad, resulting in a pixellated look.
+
+    let left = keyboard_input.just_pressed(KeyCode::KeyA)
+        || keyboard_input.just_pressed(KeyCode::ArrowLeft);
+    let right = keyboard_input.just_pressed(KeyCode::KeyD)
+        || keyboard_input.just_pressed(KeyCode::ArrowRight);
+    let confirm = keyboard_input.just_pressed(KeyCode::Enter)
+        || keyboard_input.just_pressed(KeyCode::Space)
+        || keyboard_input.just_pressed(KeyCode::KeyZ);
+
+    if confirm {
+        tmp.set(DatingState::Talking);
+    }
+
+    context.cursor += -(left as isize) + right as isize;
+
     for mut transform in &mut query {
-        let scale = (ops::sin(time.elapsed_secs()) + 1.1) * 2.0;
-        transform.scale.x = scale;
-        transform.scale.y = scale;
+        transform.translation.x = (context.cursor * 180) as f32;
     }
 }
