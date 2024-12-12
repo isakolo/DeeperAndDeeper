@@ -1,0 +1,79 @@
+[
+    { 
+      "id": "Day1Morning",
+      "text": [["Liv","..ey. Hey. Hey!"], 
+               ["Liv", "You awake?"], 
+               ["Main", "You nod blearily."], 
+               ["Liv", "Thank god."], 
+               [null, "Diedrick steps around from the back, and you only now realize they were poking around at your head."]
+               ["Diedrick", "Head injury doesn't seem to be serious, so you're all good! Lightest crash landing I've ever been in, honestly."]
+               ["Carle", "The cargo bulkheads took most of the beating, and the inertial dampeners are still working, so it's not too surprising."] 
+            ],
+      "choice": []
+    },
+    { 
+      "id": "Day1Evening",
+      "text": ["Le epic placeholder"],
+      "choice": []
+    },
+    { 
+      "id": "Day2Morning",
+      "text": ["Le epic placeholder"],
+      "choice": []
+    },
+    { 
+      "id": "Day2Evening",
+      "text": ["Le epic placeholder"],
+      "choice": []
+    },
+    { 
+      "id": "Day3Morning",
+      "text": ["Le epic placeholder"],
+      "choice": []
+    },
+    { 
+      "id": "Day3Evening",
+      "text": ["Le epic placeholder"],
+      "choice": []
+    },
+    { 
+      "id": "Day4Morning",
+      "text": ["Le epic placeholder"],
+      "choice": []
+    },
+    { 
+      "id": "Day4Evening",
+      "text": ["Le epic placeholder"],
+      "choice": []
+    },
+    { 
+      "id": "Day5Morning",
+      "text": ["Le epic placeholder"],
+      "choice": []
+    },
+    { 
+      "id": "Day5Evening",
+      "text": ["Le epic placeholder"],
+      "choice": []
+    },
+    { 
+      "id": "Day6Morning",
+      "text": ["Le epic placeholder"],
+      "choice": []
+    },
+    { 
+      "id": "Day6Evening",
+      "text": ["Le epic placeholder"],
+      "choice": []
+    },
+    { 
+      "id": "Day7Morning",
+      "text": ["Le epic placeholder"],
+      "choice": []
+    },
+    { 
+      "id": "Day7Evening",
+      "text": ["Le epic placeholder"],
+      "choice": []
+    },
+]
