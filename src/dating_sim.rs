@@ -3,6 +3,8 @@
 //    picking: Vec<option>,
 //}
 
+//mod load.rs;
+
 #[derive(Copy, Clone, Debug)]
 enum MissionType {
     Water,
@@ -18,6 +20,7 @@ enum CharactersType {
     Twin1,
     Twin2,
     Cat,
+    Carly,
 }
 
 struct CharactersStatus {
@@ -54,6 +57,8 @@ struct AnimateRotation;
 struct AnimateScale;
 
 pub fn dating_sim_plugin(app: &mut App) {
+    //    let _ = load_scenes();
+
     let janitor_joe = CharactersStatus {
         character: CharactersType::Joe,
         current_dialogue: DialogueOption {
@@ -104,7 +109,17 @@ pub fn dating_sim_plugin(app: &mut App) {
         alive: true,
     };
 
-    let characters = vec![janitor_joe, granny, cat, twin1, twin2];
+    let carly = CharactersStatus {
+        character: CharactersType::Carly,
+        current_dialogue: DialogueOption {
+            scene_flag: 4,
+            mission: None,
+        },
+        favor: 20,
+        alive: true,
+    };
+
+    let characters = vec![janitor_joe, granny, cat, twin1, twin2, carly];
 
     app.insert_resource(DatingContext {
         all_characters: characters,

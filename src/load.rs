@@ -1,42 +1,29 @@
+use serde::Deserialize;
+
+#[derive(Deserialize, Debug)]
 struct Scene {
     id: usize,
     text: String,
-    choice: Vec<String, u8>,
+    choice: Option<Vec<String, u8>>,
 }
 
 fn main() {
     println!("Hello, world!");
+    let _ = load_scene();
 }
 pub fn load_scenes() -> Vec<Scene> {
-    let parsed = json::parse(
-        r#"
-{
-    "": 200,
-    "success": true,
-    "payload": {
-        "features": [
-            "awesome",
-            "easyAPI",
-            "lowLearningCurve"
-        ]
-    }
-}
+    let j = "
+        {
+            \"id\": \"9\",
+            \"text\": \"Hello I am JSON text\",
+            \"choice\" none,
+        }";
 
-"#,
-    )
-    .unwrap();
-
-    let instantiated = object! {
-        // quotes on keys are optional
-        "code": 200,
-        success: true,
-        payload: {
-            features: [
-                "awesome",
-                "easyAPI",
-                "lowLearningCurve"
-            ]
-        }
+    let parsed: Scene = serde_json::from_str(j).unwrap();
+    let instantiated = Scene {
+        id: 9,
+        text: "Hello I am JSON text",
+        choice: None,
     };
     assert_eq!(parsed, instantiated);
 }
