@@ -1,11 +1,17 @@
-use bevy::prelude::*;
+use bevy::{
+    asset::{AssetLoader, LoadContext, io::Reader},
+    prelude::*,
+};
 use bevy_rapier2d::prelude::*;
+use image::{self, GenericImageView};
 
-use super::{despawn_screen, GameState};
+use super::{GameState, despawn_screen};
 
 pub fn game_plugin(app: &mut App) {
     app.add_plugins((RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0),))
-        .add_systems(Startup, create_map)
+        .init_asset_loader::<MapLoader>()
+        .init_asset::<MapAsset>()
+        .add_systems(Startup, load_map)
         .add_systems(
             OnEnter(GameState::Explore),
             (spawn_player, start_exploration),
@@ -21,33 +27,67 @@ pub struct Player(f32);
 #[derive(Component)]
 struct OnExploration;
 
-#[derive(Resource)]
-struct ExplorationMap {
+#[derive(Asset, TypePath, Debug)]
+struct MapAsset {
     // 1000x1000
     tiles: Vec<[Tile; 1000]>,
 }
 
-impl ExplorationMap {
-    fn from_image(image: &Image) -> ExplorationMap {
+#[derive(Resource)]
+struct ExplorationMap {
+    map: Handle<MapAsset>,
+}
+
+#[derive(Default)]
+struct MapLoader;
+
+impl MapAsset {
+    fn from_image(image: &image::DynamicImage) -> MapAsset {
         assert!(image.width() == 1000 && image.height() == 1000);
 
         let mut tiles = Vec::new();
 
-        for i in 0..1000 {
+        for x in 0..1000 {
             let mut next_row = [Tile::Error; 1000];
-            for j in 0..1000 {
-                let color = image.get_color_at(i, j).expect("wtf");
-                next_row[i as usize] = tile_from_color(color);
+            for y in 0..1000 {
+                let color = image.get_pixel(x, y).0;
+                next_row[x as usize] = tile_from_color(color);
             }
             tiles.push(next_row);
         }
 
-        ExplorationMap { tiles }
+        MapAsset { tiles }
     }
 }
 
-fn tile_from_color(c: Color) -> Tile {
-    match u32::from_be_bytes(c.to_linear().to_u8_array()) & 0xFFFFFF {
+impl AssetLoader for MapLoader {
+    type Asset = MapAsset;
+    type Settings = ();
+    type Error = anyhow::Error;
+    async fn load(
+        &self,
+        reader: &mut dyn Reader,
+        _settings: &(),
+        _load_context: &mut LoadContext<'_>,
+    ) -> Result<Self::Asset, Self::Error> {
+        use std::io::{self, BufRead, Read, Seek};
+
+        let mut bytes = Vec::new();
+        reader.read_to_end(&mut bytes).await?;
+        let cursor = io::Cursor::new(&bytes[..]);
+        let image = image::ImageReader::new(cursor)
+            .with_guessed_format()?
+            .decode()?;
+        Ok(MapAsset::from_image(&image))
+    }
+
+    fn extensions(&self) -> &[&str] {
+        &["custom"]
+    }
+}
+
+fn tile_from_color(color: [u8; 4]) -> Tile {
+    match u32::from_be_bytes(color) & 0xFFFFFF {
         0xFF_FF_FF => Tile::Air,
         0xDD_DD_DD => Tile::Rock,
         0x00_00_FF => Tile::Ice,
@@ -55,15 +95,9 @@ fn tile_from_color(c: Color) -> Tile {
     }
 }
 
-fn create_map(
-    mut commands: Commands,
-    asset_server: ResMut<AssetServer>,
-    images: Res<Assets<Image>>,
-) {
-    let map: Handle<Image> = asset_server.load("map.png");
-    commands.insert_resource(ExplorationMap::from_image(
-        images.get(&map).as_ref().unwrap(),
-    ));
+fn load_map(mut commands: Commands, asset_server: ResMut<AssetServer>) {
+    let map: Handle<MapAsset> = asset_server.load("map.png");
+    commands.insert_resource(ExplorationMap { map });
 }
 
 pub fn start_exploration(commands: Commands) {}
