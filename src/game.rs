@@ -5,6 +5,7 @@ use super::{despawn_screen, GameState};
 
 pub fn game_plugin(app: &mut App) {
     app.add_plugins((RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0),))
+        .add_systems(Startup, create_map)
         .add_systems(
             OnEnter(GameState::Explore),
             (spawn_player, start_exploration),
@@ -22,17 +23,60 @@ struct OnExploration;
 
 #[derive(Resource)]
 struct ExplorationMap {
-    tiles: [(); 0],
+    // 1000x1000
+    tiles: Vec<[Tile; 1000]>,
+}
+
+impl ExplorationMap {
+    fn from_image(image: &Image) -> ExplorationMap {
+        assert!(image.width() == 1000 && image.height() == 1000);
+
+        let mut tiles = Vec::new();
+
+        for i in 0..1000 {
+            let mut next_row = [Tile::Error; 1000];
+            for j in 0..1000 {
+                let color = image.get_color_at(i, j).expect("wtf");
+                next_row[i as usize] = tile_from_color(color);
+            }
+            tiles.push(next_row);
+        }
+
+        ExplorationMap { tiles }
+    }
+}
+
+fn tile_from_color(c: Color) -> Tile {
+    match u32::from_be_bytes(c.to_linear().to_u8_array()) & 0xFFFFFF {
+        0xFF_FF_FF => Tile::Air,
+        0xDD_DD_DD => Tile::Rock,
+        0x00_00_FF => Tile::Ice,
+        _ => Tile::Error,
+    }
+}
+
+fn create_map(
+    mut commands: Commands,
+    asset_server: ResMut<AssetServer>,
+    images: Res<Assets<Image>>,
+) {
+    let map: Handle<Image> = asset_server.load("map.png");
+    commands.insert_resource(ExplorationMap::from_image(
+        images.get(&map).as_ref().unwrap(),
+    ));
 }
 
 pub fn start_exploration(commands: Commands) {}
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug, Default)]
 enum Tile {
+    #[default]
+    Error = 0,
     Rock,
     Ice,
     Oil,
     Iron,
+    Air,
 }
 // fn load_map(texture: Handle<Image>) {
 //     let map_pixel texture::get_pixel();//server.load("mascot.png")
