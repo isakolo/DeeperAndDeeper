@@ -21,6 +21,7 @@ enum CharactersType {
     Twin2,
     Cat,
     Carly,
+    Liv,
 }
 
 struct CharactersStatus {
@@ -119,7 +120,17 @@ pub fn dating_sim_plugin(app: &mut App) {
         alive: true,
     };
 
-    let characters = vec![janitor_joe, granny, cat, twin1, twin2, carly];
+    let liv = CharactersStatus {
+        character: CharactersType::Liv,
+        current_dialogue: DialogueOption {
+            scene_flag: 4,
+            mission: None,
+        },
+        favor: 20,
+        alive: true,
+    };
+
+    let characters = vec![janitor_joe, granny, cat, twin1, twin2, carly, liv];
 
     app.insert_resource(DatingContext {
         all_characters: characters,
@@ -151,7 +162,7 @@ fn on_dating_sim(
         ..default()
     };
     for (idx, i) in context.all_characters.iter().enumerate() {
-        let size = width / 7.0;
+        let size = width / 9.0;
         let portrait = match i.character {
             CharactersType::Joe => Sprite {
                 custom_size: Some(Vec2::new(size, size)),
@@ -167,14 +178,34 @@ fn on_dating_sim(
             },
             CharactersType::Twin1 => Sprite {
                 custom_size: Some(Vec2::new(size, size)),
+                image: asset_server.load("Portraits/Character_Twin_Dedrick.png"),
+                image_mode: SpriteImageMode::Auto,
+                ..Default::default()
+            },
+
+            CharactersType::Twin2 => Sprite {
+                custom_size: Some(Vec2::new(size, size)),
                 image: asset_server.load("Portraits/Character_Twin_Fredrick.png"),
+                image_mode: SpriteImageMode::Auto,
+                ..Default::default()
+            },
+
+            CharactersType::Carly => Sprite {
+                custom_size: Some(Vec2::new(size, size)),
+                image: asset_server.load("Portraits/Character_Carly.png"),
+                image_mode: SpriteImageMode::Auto,
+                ..Default::default()
+            },
+            CharactersType::Liv => Sprite {
+                custom_size: Some(Vec2::new(size, size)),
+                image: asset_server.load("Portraits/Character_Liv.png"),
                 image_mode: SpriteImageMode::Auto,
                 ..Default::default()
             },
             _ => Sprite::from_color(Color::srgb(0.25, 0.25, 0.75), Vec2::new(size, size)),
         };
 
-        let box_position = dbg!(Vec2::new((idx as f32 * 200.0) - 500.0, 250.0));
+        let box_position = dbg!(Vec2::new((idx as f32 * size * 1.2) - width / 2.5, 250.0));
         if let Some(mission_var) = i.current_dialogue.mission {
             let box_size = Vec2::new(size / 1.5, size / 1.5);
             let box_position = box_position + Vec2::new(0.0, -150.0);
