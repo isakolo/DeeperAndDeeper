@@ -24,13 +24,13 @@ enum MissionType {
 #[derive(Deserialize, Debug)]
 enum CharactersType {
     Joe,
-    Oldlady,
-    Weed,
-    Twin1,
-    Twin2,
+    Jule,
+    Carle,
+    Fredrick,
+    Diedrick,
     Cat,
-    Carly,
     Liv,
+    Main,
 }
 
 struct CharactersStatus {
@@ -127,7 +127,7 @@ pub fn dating_sim_plugin(app: &mut App) {
     };
 
     let granny = CharactersStatus {
-        character: CharactersType::Oldlady,
+        character: CharactersType::Jule,
         current_dialogue: DialogueOption {
             scene_flag: 3,
             mission: Some(MissionType::Oil),
@@ -137,7 +137,7 @@ pub fn dating_sim_plugin(app: &mut App) {
     };
 
     let twin1 = CharactersStatus {
-        character: CharactersType::Twin1,
+        character: CharactersType::Frederick,
         current_dialogue: DialogueOption {
             scene_flag: 4,
             mission: None,
@@ -147,7 +147,7 @@ pub fn dating_sim_plugin(app: &mut App) {
     };
 
     let twin2 = CharactersStatus {
-        character: CharactersType::Twin2,
+        character: CharactersType::Diedrick,
         current_dialogue: DialogueOption {
             scene_flag: 4,
             mission: None,
@@ -271,18 +271,18 @@ fn on_dating_sim(
                 image: asset_server.load("Portraits/Janitor Joe-Recovered.png"),
                 ..Default::default()
             },
-            CharactersType::Oldlady => Sprite {
+            CharactersType::Jule => Sprite {
                 custom_size: Some(Vec2::new(size, size)),
                 image: asset_server.load("Portraits/Character_General_Jule.png"),
                 ..Default::default()
             },
-            CharactersType::Twin1 => Sprite {
+            CharactersType::Frederick => Sprite {
                 custom_size: Some(Vec2::new(size, size)),
                 image: asset_server.load("Portraits/Character_Twin_Dedrick.png"),
                 ..Default::default()
             },
 
-            CharactersType::Twin2 => Sprite {
+            CharactersType::Diedrick => Sprite {
                 custom_size: Some(Vec2::new(size, size)),
                 image: asset_server.load("Portraits/Character_Twin_Fredrick.png"),
                 ..Default::default()
