@@ -21,6 +21,7 @@ enum MissionType {
     Iron,
 }
 
+#[derive(Deserialize, Debug)]
 enum CharactersType {
     Joe,
     Oldlady,
@@ -45,6 +46,8 @@ struct DatingContext {
     day: usize,
     cursor: isize,
     selected_scene: DatingScene,
+    flags: Vec<(String, isize)>,
+    gathered_mission: Vec<MissionType>,
 }
 
 struct DialogueOption {
@@ -63,6 +66,7 @@ enum DatingState {
 #[derive(Deserialize, Debug)]
 pub struct DatingScene {
     id: String,
+    person: Option<CharactersType>,
     text: Vec<String>,
     outcome: Option<Vec<(String, isize)>>,
     choice: Option<((String, String), (String, String))>,
@@ -97,7 +101,7 @@ struct DatingObj;
 struct TalkObj;
 
 #[derive(Component)]
-struct TextBox(u8);
+struct TextBox(usize);
 
 pub fn dating_sim_plugin(app: &mut App) {
     let _ = load::load_scenes();
@@ -184,10 +188,13 @@ pub fn dating_sim_plugin(app: &mut App) {
                 "This is a placeholder".to_string(),
                 "This is a second placeholder".to_string(),
             ],
+            person: None,
             outcome: None,
             choice: None,
             mission: None,
         },
+        flags: vec![],
+        gathered_mission: vec![],
     });
 
     app.add_systems(OnEnter(GameState::DatingSim), on_dating_sim)
@@ -390,8 +397,25 @@ fn talking_action(
         tmp.set(DatingState::Chilling);
     } else if confirm {
         for (mut textbox, mut text) in &mut query {
-            let dialogue = context.selected_scene.text[(*textbox).0 as usize].clone();
-            *text = Text2d::new(dialogue);
+            (*textbox).0 += 1;
+            if (*textbox).0 < context.selected_scene.text.len() {
+                let dialogue = dbg!(context.selected_scene.text[(*textbox).0 as usize].clone());
+                *text = Text2d::new(dialogue);
+            } else {
+                //We have finished reading
+                if let Some(mission) = context.selected_scene.mission {
+                    context.gathered_mission.push(mission);
+                }
+                if context.selected_scene.outcome.is_some() {
+                    println!("Added flag, but not implemented")
+                }
+                if context.selected_scene.choice.is_some() {
+                    todo!()
+                    //context.selected_scene = Some(context.selected_scene.choice)[0][1];
+                } else {
+                    tmp.set(DatingState::Chilling);
+                }
+            }
         }
     }
 }

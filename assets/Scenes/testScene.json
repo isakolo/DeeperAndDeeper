@@ -1,11 +1,14 @@
 [
   { 
     "id": "Should we eat",
+    "person": "Joe",
     "text": ["I am hungry", "That cat is looking really yummy"],
     "choice": [["We should eat the cat", "EAT"],["We should not eat the cat","No eat"]]
+
    },
   { 
     "id": "EAT",
+        "person": "Twin1",
     "text": ["That cat was soooooo yummy", "burp"],
     "outcome": [["Foodsupply",3],["CatDead",1],["Twin1Favor",-5]]
    },
