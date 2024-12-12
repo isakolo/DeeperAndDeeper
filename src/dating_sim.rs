@@ -3,7 +3,7 @@
 //    picking: Vec<option>,
 //}
 
-//mod load.rs;
+use crate::load;
 
 #[derive(Copy, Clone, Debug)]
 enum MissionType {
@@ -34,11 +34,20 @@ struct CharactersStatus {
 #[derive(Resource)]
 struct DatingContext {
     all_characters: Vec<CharactersStatus>,
+    day: usize,
+    cursor: isize,
+    state: State,
 }
 
 struct DialogueOption {
     scene_flag: usize,
     mission: Option<MissionType>,
+}
+
+enum State {
+    Chilling,
+    Talking,
+    Choosing,
 }
 
 use bevy::{math::ops, prelude::*, window::PrimaryWindow};
@@ -58,7 +67,7 @@ struct AnimateRotation;
 struct AnimateScale;
 
 pub fn dating_sim_plugin(app: &mut App) {
-    //    let _ = load_scenes();
+    let _ = load::load_scenes();
 
     let janitor_joe = CharactersStatus {
         character: CharactersType::Joe,
@@ -134,6 +143,9 @@ pub fn dating_sim_plugin(app: &mut App) {
 
     app.insert_resource(DatingContext {
         all_characters: characters,
+        day: 1,
+        cursor: 2,
+        state: State::Talking,
     });
 
     app.add_systems(OnEnter(GameState::DatingSim), on_dating_sim);
@@ -202,6 +214,12 @@ fn on_dating_sim(
                 image_mode: SpriteImageMode::Auto,
                 ..Default::default()
             },
+            CharactersType::Cat => Sprite {
+                custom_size: Some(Vec2::new(size, size)),
+                image: asset_server.load("Portraits/Character_cat.png"),
+                image_mode: SpriteImageMode::Auto,
+                ..Default::default()
+            },
             _ => Sprite::from_color(Color::srgb(0.25, 0.25, 0.75), Vec2::new(size, size)),
         };
 
@@ -228,7 +246,7 @@ fn on_dating_sim(
 
     let text_justification = JustifyText::Center;
     // 2d camera
-    commands.spawn(Camera2d);
+    //commands.spawn(Camera2d);
     // Demonstrate changing translation
 }
 
@@ -254,6 +272,22 @@ fn follow_mouse(
 
     for mut transform in &mut transform {
         transform.translation = position.extend(0.0);
+    }
+}
+
+pub fn player_movement(keyboard_input: Res<ButtonInput<KeyCode>>, context: ResMut<DatingContext>) {
+    if let mut cursor_pos = context.cursor {
+        //let up = keyboard_input.any_pressed([KeyCode::KeyW, KeyCode::ArrowUp]);
+        //let down = keyboard_input.any_pressed([KeyCode::KeyS, KeyCode::ArrowDown]);
+        let left = keyboard_input.any_pressed([KeyCode::KeyA, KeyCode::ArrowLeft]);
+        let right = keyboard_input.any_pressed([KeyCode::KeyD, KeyCode::ArrowRight]);
+        let confirm = keyboard_input.any_pressed([KeyCode::Enter, KeyCode::Space, KeyCode::KeyZ]);
+
+        cursor_pos = -(left as isize) + right as isize;
+
+        // Update the velocity on the rigid_body_component,
+        // the bevy_rapier plugin will update the Sprite transform.
+        //rb_vels.linvel = move_delta * player.0;
     }
 }
 
