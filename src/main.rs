@@ -4,6 +4,7 @@ use bevy::prelude::*;
 
 mod dating_sim;
 mod game;
+mod load;
 
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 enum GameState {
