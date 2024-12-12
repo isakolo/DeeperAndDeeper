@@ -20,7 +20,7 @@
         ["Carle", "Chill out, maybe."],
         ["Joe", "I have the right to voice my opinion."],
         ["Carle", "It's not THAT bad."],
-        ["Jule", "We're all a bit tossed up. Have a bit of decorum!"]
+        ["Jule", "We're all a bit tossed up. Have a bit of decorum!"],
         ["You", "STOP! Stop talking... just give me a second."],
         [null, "."],
         [null, ".."],
@@ -43,7 +43,7 @@
         [null, "Liv breaks into a coughing fit lasting a handful of seconds, before using an inhaler."],
         ["Liv", "...even without the spare fuel rods."],
         ["Joe", "Speaking of, the air filtration system is shot. We're running on spare oxygen, which will last at least two months."],
-        [null, "Liv coughs lightly."]
+        [null, "Liv coughs lightly."],
         ["Joe", "But contaminants build up fast."],
         ["Liv", "I'm fine, I have my inhaler!"],
         ["Joe", "Delusional as always."],
@@ -152,5 +152,5 @@
       "id": "Day7Evening",
       "text": ["Le epic placeholder"],
       "choice": []
-    },
+    }
 ]
