@@ -62,9 +62,10 @@ enum DatingState {
 
 #[derive(Deserialize, Debug)]
 pub struct DatingScene {
-    id: usize,
+    id: String,
     text: Vec<String>,
-    choice: Option<((String, usize), (String, usize))>,
+    outcome: Option<Vec<(String, isize)>>,
+    choice: Option<((String, String), (String, String))>,
     mission: Option<MissionType>,
 }
 
@@ -178,11 +179,12 @@ pub fn dating_sim_plugin(app: &mut App) {
         day: 1,
         cursor: 2,
         selected_scene: DatingScene {
-            id: 1,
+            id: "1".to_string(),
             text: vec![
                 "This is a placeholder".to_string(),
                 "This is a second placeholder".to_string(),
             ],
+            outcome: None,
             choice: None,
             mission: None,
         },

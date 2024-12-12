@@ -1,20 +1,21 @@
 [
   { 
-    "id": 5,
+    "id": "Should we eat",
     "text": ["I am hungry", "That cat is looking really yummy"],
-    "choice": [["We should eat the cat",6],["We should not eat the cat",7]]
+    "choice": [["We should eat the cat", "EAT"],["We should not eat the cat","No eat"]]
    },
   { 
-    "id": 6,
-    "text": ["That cat was soooooo yummy", "burp"]
+    "id": "EAT",
+    "text": ["That cat was soooooo yummy", "burp"],
+    "outcome": [["Foodsupply",3],["CatDead",1],["Twin1Favor",-5]]
    },
   { 
-    "id": 7,
+    "id": "No eat",
     "text": ["Cringe","Go out onto the planet and find some food then idiot"],
     "mission": "Oil"
    },
   { 
-    "id": 9,
+    "id": "9",
     "text": ["Hello I am JSON text"]
    }
 
