@@ -58,6 +58,7 @@ struct DialogueOption {
 #[derive(Clone, Copy, Default, Eq, PartialEq, Debug, Hash, States)]
 enum DatingState {
     #[default]
+    Noting,
     Chilling,
     Talking,
     Choosing,
@@ -102,6 +103,9 @@ struct TalkObj;
 
 #[derive(Component)]
 struct TextBox(usize);
+
+#[derive(Component)]
+struct DatingOption;
 
 pub fn dating_sim_plugin(app: &mut App) {
     let _ = load::load_scenes();
@@ -197,12 +201,28 @@ pub fn dating_sim_plugin(app: &mut App) {
         gathered_mission: vec![],
     });
 
-    app.add_systems(OnEnter(GameState::DatingSim), on_dating_sim)
-        .add_systems(Update, cursor_action.run_if(in_state(GameState::DatingSim)))
-        .add_systems(OnExit(GameState::DatingSim), despawn_screen::<DatingObj>);
-
     app.init_state::<DatingState>();
 
+    //genereric
+    app.add_systems(OnEnter(GameState::DatingSim), on_dating_sim)
+        .add_systems(OnExit(GameState::DatingSim), despawn_screen::<DatingObj>);
+
+    //Chilling
+    app.add_systems(OnEnter(DatingState::Chilling), on_chill)
+        .add_systems(
+            Update,
+            cursor_action.run_if(in_state(DatingState::Chilling)),
+        );
+
+    //Dialogue
+    // app.add_systems(OnEnter(DatingState::Talking), start_talking)
+    //     .add_systems(
+    //         Update,
+    //         talking_action.run_if(in_state(DatingState::Talking)),
+    //     )
+    //     .add_systems(OnExit(DatingState::Talking), despawn_screen::<TalkObj>);
+
+    //Choices
     app.add_systems(OnEnter(DatingState::Talking), start_talking)
         .add_systems(
             Update,
@@ -216,7 +236,11 @@ pub fn dating_sim_plugin(app: &mut App) {
     );
 }
 
-fn on_dating_sim(
+fn on_dating_sim(mut tmp: ResMut<NextState<DatingState>>) {
+    tmp.set(DatingState::Chilling);
+}
+
+fn on_chill(
     mut commands: Commands,
     context: ResMut<DatingContext>,
     asset_server: Res<AssetServer>,
@@ -366,6 +390,7 @@ fn start_talking(
         .spawn((
             Sprite::from_color(Color::srgb(0.20, 0.3, 0.70), talk_size),
             Transform::from_translation(talk_position.extend(0.0)),
+            TalkObj,
         ))
         .with_children(|builder| {
             builder.spawn((
