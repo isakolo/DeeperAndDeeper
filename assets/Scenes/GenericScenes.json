@@ -5,11 +5,30 @@
                ["Liv", "You awake?"], 
                ["Main", "You nod blearily."], 
                ["Liv", "Thank god."], 
-               [null, "Diedrick steps around from the back, and you only now realize they were poking around at your head."]
-               ["Diedrick", "Head injury doesn't seem to be serious, so you're all good! Lightest crash landing I've ever been in, honestly."]
-               ["Carle", "The cargo bulkheads took most of the beating, and the inertial dampeners are still working, so it's not too surprising."] 
+               [null, "Diedrick steps around from the back, and you only now realize they were poking around at your head."],
+               ["Diedrick", "Head injury doesn't seem to be serious, so you're all good! Lightest crash landing I've ever been in, honestly."],
+               ["Carle", "The cargo bulkheads took most of the beating, and the inertial dampeners are still working, so it's not too surprising."],
+               [null, "Your head is still ringing, the world swaying. Or maybe you're swaying?"],
+               ["Liv", "Couldn't have asked for a better outcome, haha..."],
+               ["Joe", "I'd say there are several outcomes that could've been better."],
+               [null, "The chatter probably isn't helping the growing headache at the back of your skull, either."],
+               ["Diedrick", "You're a real ray of sunshine sometimes, Joe, you know that right?"],
+               ["Joe", "I'm just being honest."],
+               [null, "Definitely not helping."],
+               ["Carle", "You're being a dick, actually."],
+               ["Diedrick", "That's honesty."],
+               ["Main", "STOP! Stop talking... just give me a second."],
+               [null, "."],
+               [null, ".."],
+               [null, "..."],
+               ["Main", "We're all probably a bit shaken after the landing... let's separate and get our bearings."],
+               ["Main", "Let's meet again in an hour, okay? Sitrep on what needs repairing, what needs setting up, all that."],
+               [null, "..."],
+               ["Joe", "You're the captain..."],
+               [null, "The crew starts filtering out of the room, out into the living quarters."],
+               ["Liv", "...Thanks."]
             ],
-      "choice": []
+      "scene": [[1, "TakeStockDay1"]]
     },
     { 
       "id": "Day1Evening",
